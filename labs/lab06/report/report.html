@@ -1,0 +1,138 @@
+<h1 id="цель-работы">Цель работы</h1>
+<p>Реализовать модель «хищник – жертва», которая представляет собой
+модель межвидовой конкуренции, в xcos, с помощью блока Modelica в xcos и
+в OpenModelica.</p>
+<h1 id="задание">Задание</h1>
+<ol type="1">
+<li>Реализовать модель «хищник – жертва» в xcos.</li>
+<li>Реализовать модель «хищник – жертва» с помощью блока Modelica в
+xcos.</li>
+<li>Реализовать модель «хищник – жертва» в OpenModelica.</li>
+</ol>
+<h1 id="теоретическое-введение">Теоретическое введение</h1>
+<p>Модель «хищник–жертва» (модель Лотки — Вольтерры) представляет собой
+модель межвидовой конкуренции. В математической форме модель имеет
+вид:</p>
+<p><span class="math display">\[
+\begin{cases}
+  \dot x = ax - bxy \\
+  \dot y = cxy - dy,
+\end{cases}
+\]</span></p>
+<p>где <span class="math inline">\(x\)</span> — количество жертв; <span
+class="math inline">\(y\)</span> — количество хищников; <span
+class="math inline">\(a, b, c, d\)</span> — коэффициенты, отражающие
+взаимодействия между видами: <span class="math inline">\(a\)</span> —
+коэффициент рождаемости жертв; <span class="math inline">\(b\)</span> —
+коэффициент убыли жертв; <span class="math inline">\(c\)</span> —
+коэффициент рождения хищников; <span class="math inline">\(d\)</span> —
+коэффициент убыли хищников. <span class="citation"
+data-cites="lab_ruk">[@lab_ruk]</span></p>
+<h1 id="выполнение-лабораторной-работы">Выполнение лабораторной
+работы</h1>
+<h2 id="реализация-модели-в-xcos">Реализация модели в xcos</h2>
+<p>В начале зафиксировали начальные данные: a = 2, b = 1, c = 0, 3, d =
+1, x(0) = 2, y(0) = 1. Задали переменные окружения (рис. <span
+class="citation" data-cites="fig:001">@fig:001</span>, <span
+class="citation" data-cites="fig:002">@fig:002</span>, <span
+class="citation" data-cites="fig:003">@fig:003</span>, <span
+class="citation" data-cites="fig:004">@fig:004</span>, <span
+class="citation" data-cites="fig:005">@fig:005</span>).</p>
+<figure id="fig:001">
+<img src="image/1.jpg" style="width:70.0%"
+alt="Задали переменные окружения в xcos для модели" />
+<figcaption aria-hidden="true">Задали переменные окружения в xcos для
+модели</figcaption>
+</figure>
+<p>Построили модель «хищник – жертва» в xcos. Для реализации модели
+(рис.1)использовали блоки: CLOCK_c, CSCOPE, TEXT_f, MUX, INTEGRAL_m,
+GAINBLK_f, SUMMATION, PROD_f и CSCOPXY.</p>
+<figure id="fig:002">
+<img src="image/2.jpg" style="width:70.0%"
+alt="Модель «хищник–жертва» в xcos" />
+<figcaption aria-hidden="true">Модель «хищник–жертва» в
+xcos</figcaption>
+</figure>
+<p>В параметрах блоков интегрирования задали начальные значения x(0) =
+2, y(0) = 1 (рис.3_1 и рис.3_2)</p>
+<figure id="fig:003">
+<img src="image/3_1.jpg" style="width:70.0%"
+alt="Задать начальные значения в блоках интегрирования" />
+<figcaption aria-hidden="true">Задать начальные значения в блоках
+интегрирования</figcaption>
+</figure>
+<figure id="fig:004">
+<img src="image/3_2.jpg" style="width:70.0%"
+alt="Задать начальные значения в блоках интегрирования" />
+<figcaption aria-hidden="true">Задать начальные значения в блоках
+интегрирования</figcaption>
+</figure>
+<p>Задали конечное время интегриования, равным времени моделирования:
+30. Результат моделирования представлен на рис.5.</p>
+<figure id="fig:005">
+<img src="image/4.jpg" style="width:70.0%"
+alt="Динамика изменения численности хищников и жертв модели" />
+<figcaption aria-hidden="true">Динамика изменения численности хищников и
+жертв модели</figcaption>
+</figure>
+<h2 id="реализация-модели-с-помощью-блока-modelica-в-xcos.">Реализация
+модели с помощью блока Modelica в xcos.</h2>
+<p>Для реализации модели «хищник–жертва» с помощью языка Modelica
+использовали следующие блоки xcos: CLOCK_c, CSCOPE, CSCOPXY, TEXT_f,
+MUX, CONST_m и MBLOCK (Modelica generic). Как и ранее, задали значения
+коэффициентов a, b, c, d. Готовая модель «хищник–жертва» представлена на
+рис.6. Параметры блока Modelica представлены на рис.7_1 и рис.7_2.
+Переменные на входе (“a”,“b”, “c”, “d”) и выходе (“x”, “y”) блока заданы
+как внешние (“E”).</p>
+<figure id="fig:006">
+<img src="image/5.jpg" style="width:70.0%"
+alt="Фазовый портрет модели 6.1 при a = 2, b = 1, c = 0, 3, d = 1, x(0) = 2, y(0) = 1" />
+<figcaption aria-hidden="true">Фазовый портрет модели 6.1 при a = 2, b =
+1, c = 0, 3, d = 1, x(0) = 2, y(0) = 1</figcaption>
+</figure>
+<figure id="fig:007">
+<img src="image/6.jpg" style="width:70.0%"
+alt="Модель «хищник–жертва» в xcos с применением блока Modelica" />
+<figcaption aria-hidden="true">Модель «хищник–жертва» в xcos с
+применением блока Modelica</figcaption>
+</figure>
+<figure id="fig:008">
+<img src="image/7_1.jpg" style="width:70.0%"
+alt="Параметры блока Modelica для модели" />
+<figcaption aria-hidden="true">Параметры блока Modelica для
+модели</figcaption>
+</figure>
+<figure id="fig:009">
+<img src="image/7_2.jpg" style="width:70.0%"
+alt="Параметры блока Modelica для модели" />
+<figcaption aria-hidden="true">Параметры блока Modelica для
+модели</figcaption>
+</figure>
+<h2 id="реализация-модели-в-openmodelica.">Реализация модели в
+OpenModelica.</h2>
+<p>Создала класс и написала программу в OpenModelica.</p>
+<figure id="fig:010">
+<img src="image/8.jpg" style="width:70.0%"
+alt="Программный код для реализации модели" />
+<figcaption aria-hidden="true">Программный код для реализации
+модели</figcaption>
+</figure>
+<p>Построила график изменения численности популяций.</p>
+<figure id="fig:011">
+<img src="image/9.jpg" style="width:70.0%"
+alt="График изменения численности популяций" />
+<figcaption aria-hidden="true">График изменения численности
+популяций</figcaption>
+</figure>
+<figure id="fig:012">
+<img src="image/10.jpg" style="width:70.0%" alt="Фазовый портрет" />
+<figcaption aria-hidden="true">Фазовый портрет</figcaption>
+</figure>
+<h1 id="выводы">Выводы</h1>
+<p>Реализовала модель «хищник–жертва» (модель Лотки — Вольтерры),
+которая представляет собой модель межвидовой конкуренции в xcos, с
+помощью блока Modelica в xcos и в OpenModelica.</p>
+<h1 class="unnumbered" id="список-литературы">Список литературы</h1>
+<div id="refs" role="list">
+
+</div>
