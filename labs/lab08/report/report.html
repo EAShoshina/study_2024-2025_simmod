@@ -1,0 +1,116 @@
+<h1 id="цель-работы">Цель работы</h1>
+<p>Реализовать модель TCP/AQM в xcos и OpenModelica.</p>
+<h1 id="задание">Задание</h1>
+<ol type="1">
+<li>Построить модель TCP/AQM в xcos;</li>
+<li>Построить графики динамики изменения размера TCP окна <span
+class="math inline">\(W(t)\)</span> и размера очереди <span
+class="math inline">\(Q(t)\)</span>;</li>
+<li>Построить модель TCP/AQM в OpenModelica;</li>
+</ol>
+<h1 id="теоретическое-введение">Теоретическое введение</h1>
+<p>Протокол TCP использует механизм динамической регулировки размера
+окна для предотвращения перегрузок. Уравнение <span
+class="math inline">\(W(t) = 1/R(t) −
+(W(t)W(t−R(t)))/(2R(t−R(t)))·p(t−R(t))\)</span> отражает два ключевых
+режима:</p>
+<ul>
+<li><strong>Фаза медленного старта</strong> (первое слагаемое) —
+линейный рост окна до достижения порога ssthresh;<br />
+</li>
+<li><strong>Фаза избежания перегрузок</strong> (второе слагаемое) —
+мультипликативное уменьшение окна при детектировании потерь пакетов
+через функцию p(t).</li>
+</ul>
+<p>Функция p(t) реализует алгоритм AQM (Active Queue Management),
+который proactively управляет очередью маршрутизатора для минимизации
+задержек и потерь.</p>
+<ol type="1">
+<li><strong>Постоянные N и R</strong> — позволяют анализировать
+устойчивость системы методами теории управления.<br />
+</li>
+<li><strong>Линейная зависимость p(t) от Q(t)</strong> — упрощает анализ
+влияния длины очереди на динамику окна.</li>
+</ol>
+<p>Модель позволяет:<br />
+- Исследовать баланс между скоростью обработки пакетов (C) и
+интенсивностью трафика (NW/R);<br />
+- Анализировать стабильность системы при различных значениях K;<br />
+- Оптимизировать параметры AQM для соблюдения QoS-требований (<span
+class="math inline">\(IPTD ≤ 150 мс, IPLR ≤ 10^{-3}\)</span>).</p>
+<p>Для учебных целей упрощения оправданы, так как фокусируют внимание на
+ключевых аспектах взаимодействия TCP и AQM, игнорируя второстепенные
+факторы (например, вариативность RTT) <span class="citation"
+data-cites="first second">[@first; @second]</span>.</p>
+<h1 id="выполнение-лабораторной-работы">Выполнение лабораторной
+работы</h1>
+<p>Зададим переменные окружения <span class="math inline">\(N = 1, R =
+1, K = 5.3, C = 1, W(0) = 0.1, Q(0) = 1\)</span>.(рис. <span
+class="citation" data-cites="fig:001">@fig:001</span>).</p>
+<figure id="fig:001">
+<img src="image/1.jpg" style="width:70.0%"
+alt="Зададим переменные окружения" />
+<figcaption aria-hidden="true">Зададим переменные окружения</figcaption>
+</figure>
+<p>Построим модель TCP/AQM в xcos.</p>
+<figure id="fig:002">
+<img src="image/2.jpg" style="width:70.0%"
+alt="Схема xcos, моделирующая систему" />
+<figcaption aria-hidden="true">Схема xcos, моделирующая
+систему</figcaption>
+</figure>
+<p>Построим график динамики изменения размера TCP окна W(t) и размера
+очереди Q(t). При C=1:</p>
+<figure id="fig:003">
+<img src="image/3.jpg" style="width:70.0%"
+alt="динамики изменения размера TCP окна W(t) и размера очереди Q(t)" />
+<figcaption aria-hidden="true">динамики изменения размера TCP окна W(t)
+и размера очереди Q(t)</figcaption>
+</figure>
+<p>Построим фазовый портрет (W,Q).</p>
+<figure id="fig:004">
+<img src="image/4.jpg" style="width:70.0%"
+alt="Фазовый портрет (W,Q)" />
+<figcaption aria-hidden="true">Фазовый портрет (W,Q)</figcaption>
+</figure>
+<p>Построим график динамики изменения размера TCP окна W(t) и размера
+очереди Q(t). При C=0.9:</p>
+<figure id="fig:005">
+<img src="image/5.jpg" style="width:70.0%"
+alt="динамики изменения размера TCP окна W(t) и размера очереди Q(t)" />
+<figcaption aria-hidden="true">динамики изменения размера TCP окна W(t)
+и размера очереди Q(t)</figcaption>
+</figure>
+<p>Построим фазовый портрет (W,Q).</p>
+<figure id="fig:006">
+<img src="image/6.jpg" style="width:70.0%"
+alt="Фазовый портрет (W,Q)" />
+<figcaption aria-hidden="true">Фазовый портрет (W,Q)</figcaption>
+</figure>
+<p>Реализуем модель с помощью языка Modelica в среде OpenModelica. Для
+реализации используем оператор delay().</p>
+<figure id="fig:007">
+<img src="image/7.jpg" style="width:70.0%"
+alt="Программа на языке Modelica" />
+<figcaption aria-hidden="true">Программа на языке Modelica</figcaption>
+</figure>
+<p>Построим график динамики изменения размера TCP окна W(t) и размера
+очереди Q(t) в среде OpenModelica.</p>
+<figure id="fig:008">
+<img src="image/8.jpg" style="width:70.0%"
+alt="динамики изменения размера TCP окна W(t) и размера очереди Q(t)" />
+<figcaption aria-hidden="true">динамики изменения размера TCP окна W(t)
+и размера очереди Q(t)</figcaption>
+</figure>
+<p>Построим фазовый портрет (W,Q) в среде OpenModelica.</p>
+<figure id="fig:009">
+<img src="image/9.jpg" style="width:70.0%"
+alt="Фазовый портрет (W,Q)" />
+<figcaption aria-hidden="true">Фазовый портрет (W,Q)</figcaption>
+</figure>
+<h1 id="выводы">Выводы</h1>
+<p>Реализовали модель TCP/AQM в xcos и OpenModelica.</p>
+<h1 class="unnumbered" id="список-литературы">Список литературы</h1>
+<p>https://spot.colorado.edu/~lich1539/fn/UtilityMaximization2016.pdf
+https://arxiv.org/pdf/1307.1204
+https://scispace.com/papers/a-two-dimensional-fluid-model-for-tcp-aqm-analysis-1kfrgt1y</p>
