@@ -1,0 +1,320 @@
+<h1 id="цель-работы">Цель работы</h1>
+<p>Выполнить задания и получить практические навыки работы со средствами
+моделирования xcos, Modelica и OpenModelica. Рассмотреть модель эпидемии
+(SIR).</p>
+<h1 id="задание">Задание</h1>
+<ol type="1">
+<li>Реализовать имитационную модель эпидемии в xcos;</li>
+<li>Реализовать имитационную модель эпидемии в Modelica;</li>
+<li>Реализовать имитационную модель эпидемии в OpenModelica
+(упражнение);</li>
+<li>Выполнить задание для самостоятельной работы.</li>
+</ol>
+<h1 id="теоретическое-введение">Теоретическое введение</h1>
+<p>Модель SIR предложена в 1927 г. (W. O. Kermack, A. G. McKendrick).
+Предполагается, что особи популяции размера N могут находиться в трёх
+различных состояниях:</p>
+<ul>
+<li>S (susceptible, уязвимые) — здоровые особи, которые находятся в
+группе риска и могут подхватить инфекцию;</li>
+<li>I (infective, заражённые, распространяющие заболевание) —
+заразившиеся переносчики болезни;</li>
+<li>R (recovered/removed, вылечившиеся) — те, кто выздоровел и перестал
+распространять болезнь (в эту категорию относят, например, приобретших
+иммунитет или умерших).</li>
+</ul>
+<p>Внутри каждой из выделенных групп особи считаются неразличимыми по
+свойствам. Типичная эволюция особи популяции описывается следующей
+диаграммой:</p>
+<p><em>S-&gt;I-&gt;R</em></p>
+<p>Считаем, что система замкнута, т.е. N=S+I+R. <span class="citation"
+data-cites="lab_ruk">[@lab_ruk]</span>.</p>
+<h1 id="выполнение-лабораторной-работы">Выполнение лабораторной
+работы</h1>
+<h2 id="повторим-пример-из-лабораторной-работы">Повторим пример из
+лабораторной работы</h2>
+<h3 id="реализация-модели-в-xcos">Реализация модели в xcos</h3>
+<p>Зайдя в среду моделирования Xcos начала выполнять учебный пример. В
+начале во вкладке “Моделирование” открыла “Установить контекст” и задала
+переменные <span class="math inline">\(\beta = 1\)</span>, <span
+class="math inline">\(\nu = 0.3\)</span> (рис. <span class="citation"
+data-cites="fig:001">@fig:001</span>).</p>
+<figure id="fig:001">
+<img src="image/1.jpg" style="width:70.0%"
+alt="Установить контекст для учебного примера в Xcos" />
+<figcaption aria-hidden="true">Установить контекст для учебного примера
+в Xcos</figcaption>
+</figure>
+<p>Далее я реализовала модель при помощи следующих блоков xcos(рис.
+<span class="citation" data-cites="fig:002">@fig:002</span>):</p>
+<p><span class="math display">\[
+\begin{cases}
+  \dot s = - \beta s(t)i(t); \\
+  \dot i = \beta s(t)i(t) - \nu i(t);\\
+  \dot r = \nu i(t),
+\end{cases}
+\]</span></p>
+<ul>
+<li>CLOCK_c — запуск часов модельного времени;</li>
+<li>CSCOPE — регистрирующее устройство для построения графика;</li>
+<li>TEXT_f — задаёт текст примечаний;</li>
+<li>MUX — мультиплексер, позволяющий в данном случае вывести на графике
+сразу несколько кривых;</li>
+<li>INTEGRAL_m — блок интегрирования:</li>
+<li>GAINBLK_f — в данном случае позволяет задать значения коэффициентов
+<span class="math inline">\(\beta\)</span> и <span
+class="math inline">\(\nu\)</span>;</li>
+<li>SUMMATION — блок суммирования;</li>
+<li>PROD_f — поэлементное произведение двух векторов на входе
+блока.</li>
+</ul>
+<figure id="fig:002">
+<img src="image/2.jpg" style="width:70.0%" alt="Модель SIR в xcos" />
+<figcaption aria-hidden="true">Модель SIR в xcos</figcaption>
+</figure>
+<figure id="fig:003">
+<img src="image/3.jpg" style="width:70.0%"
+alt="Эпидемический порог модели SIR" />
+<figcaption aria-hidden="true">Эпидемический порог модели
+SIR</figcaption>
+</figure>
+<h3 id="реализация-модели-с-помощью-блока-modelica-в-xcos">Реализация
+модели с помощью блока Modelica в xcos</h3>
+<p>Для реализации модели с помощью языка Modelica помимо блоков
+<code>CLOCK_c</code>, <code>CSCOPE</code>, <code>TEXT_f</code> и
+<code>MUX</code> требуются блоки:</p>
+<ul>
+<li><code>CONST_m</code> — задаёт константу;</li>
+<li><code>MBLOCK</code> (Modelica generic) — блок реализации кода на
+языке Modelica.</li>
+</ul>
+<figure id="fig:004">
+<img src="image/4.jpg" style="width:70.0%"
+alt="Модель SIR в xcos с применением блока Modelica" />
+<figcaption aria-hidden="true">Модель SIR в xcos с применением блока
+Modelica</figcaption>
+</figure>
+<p>Задали параметры блока Modelica</p>
+<figure id="fig:005">
+<img src="image/5.jpg" style="width:70.0%"
+alt="Параметры блока Modelica" />
+<figcaption aria-hidden="true">Параметры блока Modelica</figcaption>
+</figure>
+<figure id="fig:006">
+<img src="image/6.jpg" style="width:70.0%"
+alt="Параметры блока Modelica" />
+<figcaption aria-hidden="true">Параметры блока Modelica</figcaption>
+</figure>
+<p>Получили аналогичный первому графику “Эпидемический порог модели
+SIR”</p>
+<figure id="fig:007">
+<img src="image/7.jpg" style="width:70.0%"
+alt="Эпидемический порог модели SIR" />
+<figcaption aria-hidden="true">Эпидемический порог модели
+SIR</figcaption>
+</figure>
+<h2 id="упражнение.-реализация-модели-sir-в-openmodelica">Упражнение.
+Реализация модели SIR в OpenModelica</h2>
+<p>Написали программный код на в OpenModelica</p>
+<figure id="fig:008">
+<img src="image/8.jpg" style="width:70.0%"
+alt="Код для реализация модели SIR в OpenModelica" />
+<figcaption aria-hidden="true">Код для реализация модели SIR в
+OpenModelica</figcaption>
+</figure>
+<p>Получили аналогичный первому и второму графику “Эпидемический порог
+модели SIR”</p>
+<figure id="fig:009">
+<img src="image/9.jpg" style="width:70.0%"
+alt="Эпидемический порог модели SIR" />
+<figcaption aria-hidden="true">Эпидемический порог модели
+SIR</figcaption>
+</figure>
+<h2 id="задание-для-самостоятельной-работы">Задание для самостоятельной
+работы</h2>
+<p>Предположим, что в модели SIR учитываются демографические процессы, в
+частности, что смертность в популяции полностью уравновешивает
+рождаемость, а все рожденные индивидуумы появляются на свет абсолютно
+здоровыми. Тогда получим следующую систему уравнений:</p>
+<p><span class="math display">\[
+\begin{cases}
+  \dot s = - \beta s(t)i(t) + \mu (N - s(t)); \\
+  \dot i = \beta s(t)i(t) - \nu i(t) - \mu i(t);\\
+  \dot r = \nu i(t) - \mu r(t),
+\end{cases}
+\]</span></p>
+<p>где <span class="math inline">\(\mu\)</span> — константа, которая
+равна коэффициенту смертности и рождаемости.</p>
+<h3 id="реализация-модели-в-xcos-1">Реализация модели в xcos</h3>
+<p>Построили модель SIR в xcos с учетом процесса рождения/гибели
+особей</p>
+<figure id="fig:010">
+<img src="image/10.png" style="width:70.0%" alt="Модель SIR в xcos" />
+<figcaption aria-hidden="true">Модель SIR в xcos</figcaption>
+</figure>
+<figure id="fig:003">
+<img src="image/11.png" style="width:70.0%"
+alt="Эпидемический порог модели SIR" />
+<figcaption aria-hidden="true">Эпидемический порог модели
+SIR</figcaption>
+</figure>
+<h3
+id="реализация-модели-с-помощью-блока-modelica-в-xcos-2-варианта">Реализация
+модели с помощью блока Modelica в xcos (2 варианта)</h3>
+<p>Формула выглядит следующим образом:</p>
+<p><span class="math display">\[- \beta s(t)i(t) + \mu (N -
+s(t))\]</span></p>
+<p>Но в начале мы говорили, что <span class="math inline">\(N =
+S+I+R\)</span>, значит, можно вывести следующее:</p>
+<p><span class="math display">\[N-S = I+R\]</span></p>
+<p>Используем это для построения модели</p>
+<figure id="fig:012">
+<img src="image/12.png" style="width:70.0%"
+alt="Модель SIR в xcos с применением блока Modelica" />
+<figcaption aria-hidden="true">Модель SIR в xcos с применением блока
+Modelica</figcaption>
+</figure>
+<figure id="fig:013">
+<img src="image/13.png" style="width:70.0%"
+alt="Параметры блока Modelica" />
+<figcaption aria-hidden="true">Параметры блока Modelica</figcaption>
+</figure>
+<figure id="fig:014">
+<img src="image/14.png" style="width:70.0%"
+alt="Параметры блока Modelica" />
+<figcaption aria-hidden="true">Параметры блока Modelica</figcaption>
+</figure>
+<figure id="fig:016">
+<img src="image/16.png" style="width:70.0%"
+alt="Эпидемический порог модели SIR" />
+<figcaption aria-hidden="true">Эпидемический порог модели
+SIR</figcaption>
+</figure>
+<h3 id="реализация-модели-в-openmodelica">Реализация модели в
+OpenModelica</h3>
+<p>Написали программный код на в OpenModelica</p>
+<figure id="fig:017">
+<img src="image/17.png" style="width:70.0%"
+alt="Код для реализация модели SIR в OpenModelica" />
+<figcaption aria-hidden="true">Код для реализация модели SIR в
+OpenModelica</figcaption>
+</figure>
+<figure id="fig:018">
+<img src="image/18.png" style="width:70.0%"
+alt="Эпидемический порог модели SIR" />
+<figcaption aria-hidden="true">Эпидемический порог модели
+SIR</figcaption>
+</figure>
+<h3
+id="графики-эпидемического-порога-при-различных-значениях-параметров-модели">Графики
+эпидемического порога при различных значениях параметров модели</h3>
+<p><strong>Изменение <span class="math inline">\(\beta\)</span>
+(скорости заражения):</strong></p>
+<p>Параметр <span class="math inline">\(\beta\)</span> (скорость
+заражения) оказывает существенное влияние на динамику эпидемии. Чем выше
+<span class="math inline">\(\beta\)</span>, тем быстрее распространяется
+болезнь и тем больше людей заражается.</p>
+<ul>
+<li><p><strong><span class="math inline">\(\beta\)</span> = 3:</strong>
+Высокая скорость заражения приводит к быстрому распространению эпидемии.
+Число инфицированных быстро растет, достигает пика, а затем
+снижается.</p></li>
+<li><p><strong><span class="math inline">\(\beta\)</span> = 1:</strong>
+Низкая скорость заражения приводит к медленному или незначительному
+распространению эпидемии. Число инфицированных остается низким или
+постепенно увеличивается.</p></li>
+</ul>
+<p><strong>Изменение <span class="math inline">\(\nu\)</span> (скорости
+выздоровления):</strong></p>
+<p>Более высокая скорость выздоровления способствует быстрому снижению
+числа инфицированных после пика.</p>
+<ul>
+<li><strong>Изменение <span class="math inline">\(\mu\)</span>
+(коэффициента смертности и рождаемости):</strong></li>
+</ul>
+<p>В самых базовых моделях SIR (Susceptible - восприимчивые, Infected -
+инфицированные, Recovered - выздоровевшие), которые часто используются
+для начального анализа, рождаемость и смертность (и, следовательно,
+параметр <span class="math inline">\(\mu\)</span>) обычно не
+учитываются. Это делается для упрощения модели и сосредоточения внимания
+на динамике распространения инфекции. В таких моделях население
+считается постоянным.</p>
+<ul>
+<li><p><strong><span class="math inline">\(\mu\)</span> = 1:</strong>
+Высокий коэффициент <span class="math inline">\(\mu\)</span> приводит к
+быстрому обороту популяции, что предотвращает распространение
+эпидемии.</p></li>
+<li><p><strong><span class="math inline">\(\mu\)</span> = 0.5:</strong>
+Средний коэффициент <span class="math inline">\(\mu\)</span> позволяет
+эпидемии распространяться медленно.</p></li>
+<li><p><strong><span class="math inline">\(\mu\)</span> = 0.1:</strong>
+Низкий коэффициент <span class="math inline">\(\mu\)</span> позволяет
+эпидемии распространяться быстрее, но в совокупности с изменениями
+других коэффициентов быстрый рост сопровождается и быстрым ростом
+“переболевших”.</p></li>
+</ul>
+<p><strong><span class="math inline">\(\beta\)</span> = 3, <span
+class="math inline">\(\nu\)</span> = 0.6, <span
+class="math inline">\(\mu\)</span> = 0.1</strong></p>
+<ul>
+<li>Начальная популяция восприимчивых быстро уменьшается, поскольку
+болезнь распространяется.</li>
+<li>Число инфицированных быстро растет, достигая пика, а затем
+постепенно снижается.</li>
+<li>Число выздоровевших увеличивается и стабилизируется на определенном
+уровне.</li>
+<li>Система достигает состояния равновесия, где популяция восприимчивых
+стабилизируется на уровне около 0.25, инфицированных - на уровне около
+0.1, а выздоровевших - на уровне около 0.65.</li>
+</ul>
+<p><strong><span class="math inline">\(\beta\)</span> = 1, <span
+class="math inline">\(\nu\)</span> = 0.3, <span
+class="math inline">\(\mu\)</span> = 1</strong></p>
+<ul>
+<li>Число восприимчивых остается неизменным.</li>
+<li>Число инфицированных остается очень низким.</li>
+<li>Число выздоровевших также остается неизменным.</li>
+<li>Болезнь не может распространиться.</li>
+</ul>
+<p><strong><span class="math inline">\(\beta\)</span> = 1, <span
+class="math inline">\(\nu\)</span> = 0.3, <span
+class="math inline">\(\mu\)</span> = 0.5</strong></p>
+<ul>
+<li>Число восприимчивых немного уменьшается.</li>
+<li>Число инфицированных остается низким, но постепенно
+увеличивается.</li>
+<li>Число выздоровевших также постепенно увеличивается.</li>
+</ul>
+<p><strong><span class="math inline">\(\beta\)</span> = 1, <span
+class="math inline">\(\nu\)</span> = 0.3, <span
+class="math inline">\(\mu\)</span> = 0.1</strong></p>
+<ul>
+<li>Начальная популяция восприимчивых значительно уменьшается.</li>
+<li>Число инфицированных быстро растет, достигая пика, а затем
+снижается.</li>
+<li>Число выздоровевших увеличивается и стабилизируется на определенном
+уровне.</li>
+<li>Система достигает состояния равновесия, где популяция восприимчивых
+стабилизируется на уровне около 0.4, инфицированных - на уровне около
+0.17, а выздоровевших - на уровне около 0.45.</li>
+</ul>
+<figure id="fig:019">
+<img src="image/19.png" style="width:70.0%"
+alt="Эпидемический порог модели SIR" />
+<figcaption aria-hidden="true">Эпидемический порог модели
+SIR</figcaption>
+</figure>
+<figure id="fig:020">
+<img src="image/20.png" style="width:70.0%"
+alt="Эпидемический порог модели SIR" />
+<figcaption aria-hidden="true">Эпидемический порог модели
+SIR</figcaption>
+</figure>
+<h1 id="выводы">Выводы</h1>
+<p>Я получила практические навыки работы со средствами моделирования
+xcos, Modelica и OpenModelica. Была рассмотрена модель эпидемии
+(SIR).</p>
+<h1 class="unnumbered" id="список-литературы">Список литературы</h1>
+<div id="refs" role="list">
+
+</div>
