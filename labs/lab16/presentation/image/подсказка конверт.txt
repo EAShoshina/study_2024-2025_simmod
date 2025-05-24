@@ -1,0 +1,2 @@
+pandoc report.md -o report.html --mathjax
+pandoc report.md --pdf-engine=xelatex -o report.pdf
