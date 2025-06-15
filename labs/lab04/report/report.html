@@ -1,0 +1,271 @@
+<h1 id="цель-работы">Цель работы</h1>
+<p>Выполнить задание для самостоятельного выполнения.</p>
+<h1 id="задание">Задание</h1>
+<ol type="1">
+<li>Для приведённой схемы разработать имитационную модель в пакете
+NS-2.</li>
+<li>Построить график изменения размера окна TCP (в Xgraph и в
+GNUPlot);</li>
+<li>Построить график изменения длины очереди и средней длины очереди на
+первом маршрутизаторе.</li>
+<li>Оформить отчёт о выполненной работе.</li>
+</ol>
+<h1 id="теоретическое-введение">Теоретическое введение</h1>
+<h3 id="постановка-задачи">4.1. Постановка задачи</h3>
+<p>Описание моделируемой сети: - сеть состоит из N TCP-источников, N
+TCP-приёмников, двух маршрутизаторов R1 и R2 между источниками и
+приёмниками (N — не менее 20); - между TCP-источниками и первым
+маршрутизатором установлены дуплексные соединения с пропускной
+способностью 100 Мбит/с и задержкой 20 мс очередью типа DropTail; -
+между TCP-приёмниками и вторым маршрутизатором установлены дуплексные
+соединения с пропускной способностью 100 Мбит/с и задержкой 20 мс
+очередью типа DropTail; - между маршрутизаторами установлено симплексное
+соединение (R1–R2) с пропускной способностью 20 Мбит/с и задержкой 15 мс
+очередью типа RED, размером буфера 300 пакетов; в обратную сторону —
+симплексное соединение (R2–R1) с пропускной способностью 15 Мбит/с и
+задержкой 20 мс очередью типа DropTail; - данные передаются по протоколу
+FTP поверх TCPReno; - параметры алгоритма RED: qmin = 75, qmax = 150, qw
+= 0, 002, pmax = 0.1; - максимальный размер TCP-окна 32; размер
+передаваемого пакета 500 байт; время моделирования — не менее 20 единиц
+модельного времени.</p>
+<h1 id="выполнение-лабораторной-работы">Выполнение лабораторной
+работы</h1>
+<h3
+id="для-приведённой-схемы-разработали-имитационную-модель-в-пакете-ns-2">1.
+Для приведённой схемы разработали имитационную модель в пакете NS-2</h3>
+<pre><code># создание объекта Simulator
+set ns [new Simulator]
+
+# открытие на запись файла out.nam для визуализатора nam
+set nf [open out.nam w]
+
+# все результаты моделирования будут записаны в переменную nf
+$ns namtrace-all $nf
+
+# открытие на запись файла трассировки out.tr
+# для регистрации всех событий
+set f [open out.tr w]
+# все регистрируемые события будут записаны в переменную f
+$ns trace-all $f
+
+Agent/TCP set window_ 32
+Agent/TCP set pktSize_ 500
+
+# процедура finish
+proc finish {} {
+  global tchan_
+  # подключение кода AWK:
+  set awkCode {
+  {
+    if ($1 == &quot;Q&quot; &amp;&amp; NF&gt;2) {
+      print $2, $3 &gt;&gt; &quot;temp.q&quot;;
+      set end $2
+  }
+    else if ($1 == &quot;a&quot; &amp;&amp; NF&gt;2)
+      print $2, $3 &gt;&gt; &quot;temp.a&quot;;
+  }
+}
+
+
+exec rm -f temp.q temp.a
+exec touch temp.a temp.q
+
+set f [open temp.q w]
+puts $f &quot;0.Color: Purple&quot;
+close $f
+
+set f [open temp.a w]
+puts $f &quot;0.Color: Purple&quot;
+close $f
+
+exec awk $awkCode all.q
+
+# Запуск xgraph с графиками окна TCP и очереди:
+exec xgraph -fg pink -bg purple -bb -tk -x time -t &quot;TCPRenoCWND&quot; WindowVsTimeRenoOne &amp;
+exec xgraph -fg pink -bg purple -bb -tk -x time -t &quot;TCPRenoCWND&quot; WindowVsTimeRenoAll &amp;
+exec xgraph -bb -tk -x time -y queue temp.q &amp;
+exec xgraph -bb -tk -x time -y queue temp.a &amp;
+exec nam out.nam &amp;
+exit 0
+}
+
+# Формирование файла с данными о размере окна TCP:
+proc plotWindow {tcpSource file} {
+  global ns
+  set time 0.01
+  set now [$ns now]
+  set cwnd [$tcpSource set cwnd_]
+  puts $file &quot;$now $cwnd&quot;
+  $ns at [expr $now+$time] &quot;plotWindow $tcpSource $file&quot;
+}
+
+set r1 [$ns node]
+set r2 [$ns node]
+
+$ns simplex-link $r1 $r2 20Mb 15ms RED
+$ns simplex-link $r2 $r1 15Mb 20ms DropTail
+$ns queue-limit $r1 $r2 300
+
+set N 30
+for {set i 0} {$i &lt; $N} {incr i} {
+  set n1($i) [$ns node]
+  $ns duplex-link $n1($i) $r1 100Mb 20ms DropTail
+  set n2($i) [$ns node]
+  $ns duplex-link $n2($i) $r2 100Mb 20ms DropTail
+
+  set tcp($i) [$ns create-connection TCP/Reno $n1($i) TCPSink $n2($i) $i]
+  set ftp($i) [$tcp($i) attach-source FTP]
+}
+
+# Мониторинг размера окна TCP:
+set windowVsTimeOne [open WindowVsTimeRenoOne w]
+puts $windowVsTimeOne &quot;0.Color: White&quot;
+set windowVsTimeAll [open WindowVsTimeRenoAll w]
+puts $windowVsTimeAll &quot;0.Color: White&quot;
+
+set qmon [$ns monitor-queue $r1 $r2 [open qm.out w] 0.1];
+[$ns link $r1 $r2] queue-sample-timeout;
+
+# Мониторинг очереди:
+set redq [[$ns link $r1 $r2] queue]
+$redq set thresh_ 75
+$redq set maxthresh_ 150
+$redq set q_weight_ 0.002
+$redq set linterm_ 10
+
+set tchan_ [open all.q w]
+$redq trace curq_
+$redq trace ave_
+$redq attach $tchan_
+
+for {set i 0} {$i &lt; $N} {incr i} {
+  $ns at 0.0 &quot;$ftp($i) start&quot;
+  $ns at 0.0 &quot;plotWindow $tcp($i) $windowVsTimeAll&quot;
+}
+
+$ns at 0.0 &quot;plotWindow $tcp(1) $windowVsTimeOne&quot;
+
+# at-событие для планировщика событий, которое запускает
+# процедуру finish через 20s после начала моделирования
+$ns at 20.0 &quot;finish&quot;
+# запуск модели
+$ns run</code></pre>
+<ol start="2" type="1">
+<li>Построили графики изменения размера окна TCP (в Xgraph и в GNUPlot)
+и построили графики изменения длины очереди и средней длины очереди на
+первом маршрутизаторе.</li>
+</ol>
+<figure id="fig:001">
+<img src="image/1.jpg" style="width:50.0%"
+alt="Изменение размера окна TCP на линке 1-го источника при N=30" />
+<figcaption aria-hidden="true">Изменение размера окна TCP на линке 1-го
+источника при N=30</figcaption>
+</figure>
+<figure id="fig:002">
+<img src="image/2.jpg" style="width:50.0%"
+alt="Изменение размера окна TCP на всех источниках при N=30" />
+<figcaption aria-hidden="true">Изменение размера окна TCP на всех
+источниках при N=30</figcaption>
+</figure>
+<figure id="fig:003">
+<img src="image/3.jpg" style="width:50.0%"
+alt="Изменение размера длины очереди на линке (R1–R2) при N=30, q_min = 75, q_max = 150" />
+<figcaption aria-hidden="true">Изменение размера длины очереди на линке
+(R1–R2) при N=30, q_min = 75, q_max = 150</figcaption>
+</figure>
+<figure id="fig:004">
+<img src="image/4.jpg" style="width:50.0%"
+alt="Изменение размера средней длины очереди на линке (R1–R2) при N=30, q_min = 75, q_max = 150" />
+<figcaption aria-hidden="true">Изменение размера средней длины очереди
+на линке (R1–R2) при N=30, q_min = 75, q_max = 150</figcaption>
+</figure>
+<pre><code>#!/usr/bin/gnuplot -persist
+# задаём текстовую кодировку,
+# тип терминала, тип и размер шрифта
+
+set encoding utf8
+set term pngcairo font &quot;Helvetica,9&quot;
+
+# задаём выходной файл графика
+set out &#39;window_1.png&#39;
+
+# задаём название графика
+set title &quot;Изменение размера окна TCP на линке 1-го источника при N=30&quot;
+
+# подписи осей графика
+set xlabel &quot;t[s]&quot; font &quot;Helvetica, 10&quot;
+set ylabel &quot;CWND [pkt]&quot; font &quot;Helvetica, 10&quot;
+
+# построение графика, используя значения
+# 1-го и 2-го столбцов файла WindowVsTimeRenoOne
+plot &quot;WindowVsTimeRenoOne&quot; using ($1):($2) with lines title &quot;Размер окна TCP&quot;
+
+# задаём выходной файл графика
+set out &#39;window_2.png&#39;
+
+# задаём название графика
+set title &quot;Изменение размера окна TCP на всех N источниках  при N=30&quot;
+
+# построение графика, используя значения
+# 1-го и 2-го столбцов файла WindowVsTimeRenoAll
+plot &quot;WindowVsTimeRenoAll&quot; using ($1):($2) with lines title &quot;Размер окна TCP&quot;
+
+# задаём выходной файл графика
+set out &#39;queue.png&#39;
+
+# задаём название графика
+set title &quot;Изменение размера длины очереди на линке (R1–R2)&quot;
+
+# подписи осей графика
+set xlabel &quot;t[s]&quot; font &quot;Helvetica, 10&quot;
+set ylabel &quot;Queue Length [pkt]&quot; font &quot;Helvetica, 10&quot;
+
+# построение графика, используя значения
+# 1-го и 2-го столбцов файла temp.q
+plot &quot;temp.q&quot; using ($1):($2) with lines title &quot;Текущая длина очереди&quot;
+
+# задаём выходной файл графика
+set out &#39;av_queue.png&#39;
+
+# задаём название графика
+set title &quot;Изменение размера средней длины очереди на линке (R1–R2)&quot;
+
+# подписи осей графика
+set xlabel &quot;t[s]&quot; font &quot;Helvetica, 10&quot;
+set ylabel &quot;Queue Avg Length [pkt]&quot; font &quot;Helvetica, 10&quot;
+
+# построение графика, используя значения
+# 1-го и 2-го столбцов файла temp.a
+plot &quot;temp.a&quot; using ($1):($2) with lines title &quot;Средняя длина очереди&quot;</code></pre>
+<figure id="fig:005">
+<img src="image/5.jpg" style="width:50.0%"
+alt="Изменение размера окна TCP на линке 1-го источника при N=30" />
+<figcaption aria-hidden="true">Изменение размера окна TCP на линке 1-го
+источника при N=30</figcaption>
+</figure>
+<figure id="fig:006">
+<img src="image/6.jpg" style="width:50.0%"
+alt="Изменение размера окна TCP на всех источниках при N=30" />
+<figcaption aria-hidden="true">Изменение размера окна TCP на всех
+источниках при N=30</figcaption>
+</figure>
+<figure id="fig:007">
+<img src="image/7.jpg" style="width:50.0%"
+alt="Изменение размера длины очереди на линке (R1–R2) при N=30, q_min = 75, q_max = 150" />
+<figcaption aria-hidden="true">Изменение размера длины очереди на линке
+(R1–R2) при N=30, q_min = 75, q_max = 150</figcaption>
+</figure>
+<figure id="fig:008">
+<img src="image/8.jpg" style="width:50.0%"
+alt="Изменение размера средней длины очереди на линке (R1–R2) при N=30, q_min = 75, q_max = 150" />
+<figcaption aria-hidden="true">Изменение размера средней длины очереди
+на линке (R1–R2) при N=30, q_min = 75, q_max = 150</figcaption>
+</figure>
+<h1 id="выводы">Выводы</h1>
+<p>Выполнили задание для самостоятельного выполнения.</p>
+<h1 class="unnumbered" id="список-литературы">Список литературы</h1>
+<ol type="1">
+<li>https://ieeexplore.ieee.org/document/1019265</li>
+<li>https://redos.red-soft.ru/base/redos-8_0/8_0-network/8_0-sett-network/</li>
+<li>https://asvk.cs.msu.ru/~sveta/CN_lecture_4.pdf</li>
+</ol>
